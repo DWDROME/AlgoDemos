@@ -5,6 +5,7 @@ author: Atsushi Sakai(@Atsushi_twi)
 Modified by: Grizi-ju
 Watch the video at bilibili, ID:小巨同学zz
 Any questions, welcome the exchanges
+
 See Wikipedia article (https://en.wikipedia.org/wiki/A*_search_algorithm)
 """
 
@@ -78,12 +79,11 @@ class AStarPlanner:
             # 将当前节点显示出来
             if show_animation:
                 plt.plot(self.calc_grid_position(current.x, self.minx),
-                         self.calc_grid_position(current.y, self.miny),
-                         "xc")   # 青色x 搜索点
+                        self.calc_grid_position(current.y, self.miny),
+                        "xc")   # 青色x 搜索点
                 # 按esc退出
                 plt.gcf().canvas.mpl_connect('key_release_event',
-                                              lambda event: [exit(0) if event.key == 'escape' else None]
-                                            )
+                            lambda event: exit(0) if getattr(event, 'key', None) == 'escape' else None)
                 if len(closed_set.keys()) % 10 == 0:
                     plt.pause(0.001)
 
@@ -124,12 +124,12 @@ class AStarPlanner:
         return pathx, pathy
 
     
-    def calc_final_path(self, ngoal, closedset):    # 传入目标点和closed表，经过函数处理得到最终所有的xy列表
+    def calc_final_path(self, ngoal, closed_set):    # 传入目标点和closed表，经过函数处理得到最终所有的xy列表
         pathx, pathy = [self.calc_grid_position(ngoal.x, self.minx)], [
                         self.calc_grid_position(ngoal.y, self.miny)]
         parent_index = ngoal.parent_index
         while parent_index != -1:
-            n = closedset[parent_index]
+            n = closed_set[parent_index]
             pathx.append(self.calc_grid_position(n.x, self.minx))
             pathy.append(self.calc_grid_position(n.y, self.miny))
             parent_index = n.parent_index
@@ -218,7 +218,7 @@ class AStarPlanner:
                     [1, -1, math.sqrt(2)],
                     [-1, 1, math.sqrt(2)],
                     [-1, -1, math.sqrt(2)]    
-                 ]
+                ]
         
         return motion
 
