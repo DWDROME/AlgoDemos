@@ -155,8 +155,10 @@ class AStarPlanner:
         return round((position - min_pos) / self.resolution)  # (当前节点-最小处的坐标)/分辨率=pos_index  round四舍五入向下取整
 
     # 计算栅格地图节点的index： 传入某个节点
+    # def calc_grid_index(self, node):
+    #     return (node.y - self.miny) * self.xwidth + (node.x - self.minx)   
     def calc_grid_index(self, node):
-        return (node.y - self.miny) * self.xwidth + (node.x - self.minx)   
+        return node.y * self.xwidth + node.x  
 
     # 验证是否为可通行节点
     def verify_node(self, node):
