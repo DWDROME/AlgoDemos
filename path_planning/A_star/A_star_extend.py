@@ -7,6 +7,8 @@ Modified by: DWDROME
 import math
 import numpy as np
 import matplotlib.pyplot as plt
+from math import factorial
+
 
 show_animation = True # 是否显示动画
 
@@ -159,10 +161,31 @@ class AStarPlanner:
     def calc_grid_index(self, node):
         return (node.y - self.miny)* self.xwidth + (node.x - self.minx)
     
-    # 启发函数（欧氏距离）
+    # 启发函数
     @staticmethod
     def calc_heuristic(node1,node2):
-        h = math.hypot(node1.x - node2.x, node1.y - node2.y)
+        # # 曼哈顿距离
+        # h = np.abs(node1.x - node2.x) + np.abs(node1.y - node2.y)
+
+        # # 欧几里得距离
+        # h = math.hypot(node1.x - node2.x, node1.y - node2.y )
+
+        # #切比雪夫距离
+        # dx = np.abs(node1.x - node2.x)
+        # dy = np.abs(node1.y - node2.y)
+        # min_xy = min(dx, dy)
+        # h = dx + dy + (math.sqrt(2) - 2)* min_xy
+        # return h
+
+        # 对欧氏距离的改进
+        d = math.hypot(node1.x - node2.x, node1.y - node2.y )
+
+        # 18是到达墙的拐点时，d大约的距离
+        if d > 18:
+            w = 3.0
+        else:
+            w = 0.8
+        h = w*d
         return h
     
     @staticmethod
@@ -202,6 +225,16 @@ class AStarPlanner:
     def calc_xyindex(self, position, min_pos):
         return round((position - min_pos) / self.resolution)
 
+
+def comb(n, k):
+    return factorial(n) // (factorial(k) * factorial(n-k))
+def get_bezier_curve(points):
+    n = len(points) - 1
+    return lambda t: sum(comb(n, i)*t**i * (1-t)**(n-i)*points[i] for i in range(n+1))
+def evaluate_bezier(points, total):
+    bezier = get_bezier_curve(points)
+    new_points = np.array([bezier(t) for t in np.linspace(0, 1, total)]) # 0~1之间生成total个linear sequence
+    return new_points[:,0], new_points[:,1] 
 
 def main():
     print( __file__ + ' Start!!')
@@ -245,8 +278,47 @@ def main():
     a_star = AStarPlanner(ox,oy,grid_size,robot_radius)
     pathx,pathy = a_star.planning(sx, sy, gx ,gy)
 
+    # if show_animation:
+    #     plt.plot(pathx, pathy, "-r")  # 红色直线 最终路径
+    #     plt.show()
+    #     plt.pause(0.001)   # 动态显示
+
+    # 贝塞尔曲线的控制点，为了方便更改，可根据出图效果调整
+    points = np.array([[pathx[0], pathy[0]], [pathx[1], pathy[1]], [pathx[2], pathy[2]], 
+                        [pathx[3], pathy[3]],[pathx[4], pathy[4]],[pathx[5], pathy[5]],
+                        [pathx[6], pathy[6]],[pathx[7], pathy[7]],[pathx[8], pathy[8]],
+                        [pathx[9], pathy[9]],[pathx[10], pathy[10]],[pathx[11], pathy[11]],
+                        [pathx[12], pathy[12]],[pathx[13], pathy[13]],[pathx[14], pathy[14]],
+                        [pathx[15], pathy[15]]])
+    points1 = np.array([[pathx[15], pathy[15]], [pathx[16], pathy[16]],[pathx[17], pathy[17]]])                    
+    points2 = np.array([[pathx[17], pathy[17]],[pathx[18], pathy[18]], [pathx[19], pathy[19]], [pathx[20], pathy[20]], 
+                        [pathx[21], pathy[21]],[pathx[22], pathy[22]],[pathx[23], pathy[23]],
+                        [pathx[24], pathy[24]],[pathx[25], pathy[25]],[pathx[26], pathy[26]],
+                        [pathx[27], pathy[27]]])
+    points3 = np.array([[pathx[27], pathy[27]],[pathx[28], pathy[28]],[pathx[29], pathy[29]]])  
+    points4 = np.array([[pathx[29], pathy[29]],[pathx[30], pathy[30]], [pathx[31], pathy[31]], [pathx[32], pathy[32]], 
+                        [pathx[33], pathy[33]],[pathx[34], pathy[34]],[pathx[35], pathy[35]],
+                        [pathx[36], pathy[36]],[pathx[37], pathy[37]],[pathx[38], pathy[38]],
+                        [pathx[39], pathy[39]],[pathx[40], pathy[40]],[pathx[41], pathy[41]],
+                        [pathx[42], pathy[42]],[pathx[43], pathy[43]],[pathx[44], pathy[44]],
+                        [pathx[45], pathy[45]],[pathx[46], pathy[46]],[pathx[47], pathy[47]],
+                        [pathx[48], pathy[48]],[pathx[49], pathy[49]],[pathx[50], pathy[50]],
+                        [pathx[51], pathy[51]],[pathx[52], pathy[52]]])
+    
+    bx, by = evaluate_bezier(points, 50)
+    bx1, by1 = evaluate_bezier(points1, 50)
+    bx2, by2 = evaluate_bezier(points2, 50)
+    bx3, by3 = evaluate_bezier(points3, 50)
+    bx4, by4 = evaluate_bezier(points4, 50)
+
     if show_animation:
-        plt.plot(pathx, pathy, "-r")  # 红色直线 最终路径
+        plt.plot(pathx, pathy, "-r")  # 红色线 最终路径
+        plt.plot(bx, by, 'b-')        # 蓝色线 贝塞尔曲线
+        plt.plot(bx1, by1, 'b-')
+        plt.plot(bx2, by2, 'b-')
+        plt.plot(bx3, by3, 'b-')
+        plt.plot(bx4, by4, 'b-')
+
         plt.show()
         plt.pause(0.001)   # 动态显示
 
