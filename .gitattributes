@@ -1,0 +1,6 @@
+# 所有文本文件统一使用 LF 作为行结束符
+* text=auto eol=lf
+
+# 例外：Windows 专属文件（如 .sln/.vcxproj）可保留 CRLF
+*.sln text eol=crlf
+*.vcxproj text eol=crlf
